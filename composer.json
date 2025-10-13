@@ -1,0 +1,10 @@
+{
+    "name": "atividade/to-do-simple",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "require": {}
+}
