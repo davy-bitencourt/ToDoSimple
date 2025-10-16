@@ -45,10 +45,6 @@ function e(string $s): string {
               <div class="actions">
                 <a class="btn" href="/tasks/<?php echo (int)$t["id"]; ?>/edit">Editar</a>
 
-                <form method="post" action="/tasks/<?php echo (int)$t["id"]; ?>/toggle" class="inline">
-                  <button type="submit" class="btn">Mudar Status</button>
-                </form>
-
                 <form method="post" action="/tasks/<?php echo (int)$t["id"]; ?>/delete" class="inline"
                       onsubmit="return confirm(&quot;Deseja excluir esta tarefa? (Esta ação não pode ser desfeita.)&quot;);">
                   <button type="submit" class="btn-danger">Excluir</button>
