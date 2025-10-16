@@ -1,5 +1,5 @@
 <?php
-namespace App\Model;
+namespace app\model;
 
 class Task {
     private string $file;

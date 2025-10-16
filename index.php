@@ -5,7 +5,7 @@ ini_set("display_errors", "1");
 error_reporting(E_ALL);
 
 spl_autoload_register(function ($class) {
-    $prefix = "App\\";
+    $prefix = "app\\";
     $baseDir = __DIR__ . "/app/";
     if (strncmp($prefix, $class, strlen($prefix)) !== 0)
         return;
@@ -15,7 +15,7 @@ spl_autoload_register(function ($class) {
         require $file;
 });
 
-use App\Controllers\TaskController;
+use app\controllers\TaskController;
 
 $method = $_SERVER["REQUEST_METHOD"];
 $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);

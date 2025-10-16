@@ -1,7 +1,7 @@
 <?php
-namespace App\Controllers;
+namespace app\controllers;
 
-use App\Model\Task;
+use app\model\Task;
 
 class TaskController {
     private Task $model;
