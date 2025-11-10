@@ -1,126 +1,74 @@
 <?php
-require_once __DIR__ . '/../model/Pedido.php';
-require_once __DIR__ . '/../model/Cliente.php';
 require_once __DIR__ . '/Controller.php';
 
 class PedidoController extends Controller
 {
-    private function storagePath(): string
-    {
-        return __DIR__ . '/../../storage/pedidos.json';
-    }
-
-    private function readAll(): array
-    {
-        $raw = @file_get_contents($this->storagePath());
-        $data = json_decode($raw, true);
-        return is_array($data) ? $data : [];
-    }
-
-    private function writeAll(array $data): void
-    {
-        file_put_contents($this->storagePath(), json_encode(array_values($data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . PHP_EOL, LOCK_EX);
-    }
-
-    public function index()
-    {
-        $all = $this->readAll();
-        $models = array_map(fn($p) => new Pedido(
-            (int)($p['id'] ?? 0),
-            $p['id_prato'] ?? [],
-            new Cliente($p['cliente']['nome'] ?? '', $p['cliente']['endereco'] ?? '')
-        ), $all);
-        $this->render('pedidos/index', ['pedidos' => $models]);
-    }
-
-    public function show(int $id)
-    {
-        $all = $this->readAll();
-        foreach ($all as $p) {
-            if (isset($p['id']) && (int)$p['id'] === $id) {
-                $model = new Pedido(
-                    (int)$p['id'],
-                    $p['id_prato'] ?? [],
-                    new Cliente($p['cliente']['nome'] ?? '', $p['cliente']['endereco'] ?? '')
-                );
-                $this->render('pedidos/show', ['pedido' => $model]);
-                return;
-            }
-        }
-        $this->json(['error' => 'Pedido não encontrado'], 404);
-    }
+    private function storage() { return __DIR__ . '/../../storage/pedidos.json'; }
 
     public function create()
     {
-        $this->render('pedidos/create');
+        $this->renderView(__DIR__ . '/../../views/fazerPredido.php');
     }
 
     public function store(array $data)
     {
-        // espera: id_prato (array) e cliente (array com nome,endereco)
-        if (empty($data['cliente']['nome']) || empty($data['cliente']['endereco'])) {
-            $this->json(['error' => 'cliente.nome e cliente.endereco são obrigatórios'], 400);
+        $clienteNome = trim($data['cliente']['nome'] ?? '');
+        $tipo = ($data['tipo'] ?? 'entrega');
+        if ($clienteNome === '' || ($tipo === 'entrega' && empty($data['cliente']['endereco']))) {
+            http_response_code(400); echo "Dados do cliente incompletos"; exit;
         }
-
-        $all = $this->readAll();
-        $nextId = 1;
-        foreach ($all as $it) {
-            if (isset($it['id'])) $nextId = max($nextId, (int)$it['id'] + 1);
-        }
-
+        $all = $this->readJson($this->storage());
+        $next = 1; foreach ($all as $it) if (!empty($it['id'])) $next = max($next, (int)$it['id']+1);
         $entry = [
-            'id' => $nextId,
+            'id' => $next,
+            'tipo' => $tipo,
             'id_prato' => $data['id_prato'] ?? [],
-            'cliente' => [
-                'nome' => $data['cliente']['nome'],
-                'endereco' => $data['cliente']['endereco']
-            ]
+            'cliente' => ['nome'=>$clienteNome,'endereco'=> $data['cliente']['endereco'] ?? ''],
+            'status' => 'pendente',
+            'created_at' => date('c')
         ];
-
         $all[] = $entry;
-        $this->writeAll($all);
-
-        $this->json($entry, 201);
+        $this->writeJson($this->storage(), $all);
+        header('Location: /?r=pedidos/create&ok=1'); exit;
     }
 
-    public function edit(int $id)
+    public function index()
     {
-        $all = $this->readAll();
-        foreach ($all as $p) {
-            if (isset($p['id']) && (int)$p['id'] === $id) {
-                $this->render('pedidos/edit', ['pedido' => $p]);
-                return;
-            }
+        $pedidos = $this->readJson($this->storage());
+        usort($pedidos, fn($a,$b)=> ($b['id']??0) <=> ($a['id']??0));
+        $this->renderView(__DIR__ . '/../../views/gerenciarPedido.php', ['pedidos'=>$pedidos]);
+    }
+
+    public function show(int $id)
+    {
+        $pedidos = $this->readJson($this->storage());
+        foreach ($pedidos as $p) if ((int)($p['id']??0) === $id) {
+            $this->renderView(__DIR__ . '/../../views/pedidos_show.php', ['pedido'=>$p]);
         }
-        $this->json(['error' => 'Pedido não encontrado'], 404);
+        http_response_code(404); echo "Pedido não encontrado"; exit;
     }
 
     public function update(int $id, array $data)
     {
-        $all = $this->readAll();
-        foreach ($all as $i => $p) {
-            if (isset($p['id']) && (int)$p['id'] === $id) {
-                $all[$i]['id_prato'] = $data['id_prato'] ?? ($p['id_prato'] ?? []);
-                if (isset($data['cliente'])) {
-                    $all[$i]['cliente']['nome'] = $data['cliente']['nome'] ?? ($p['cliente']['nome'] ?? '');
-                    $all[$i]['cliente']['endereco'] = $data['cliente']['endereco'] ?? ($p['cliente']['endereco'] ?? '');
-                }
-                $this->writeAll($all);
-                $this->json($all[$i]);
-                return;
+        $all = $this->readJson($this->storage());
+        foreach ($all as $i=>$p) {
+            if ((int)($p['id']??0) === $id) {
+                $status = $data['status'] ?? null;
+                if (!in_array($status,['pendente','pronto'], true)) { http_response_code(400); echo "Status inválido"; exit; }
+                $all[$i]['status'] = $status;
+                $all[$i]['updated_at'] = date('c');
+                $this->writeJson($this->storage(), $all);
+                header('Location: /?r=pedidos/manage'); exit;
             }
         }
-        $this->json(['error' => 'Pedido não encontrado'], 404);
+        http_response_code(404); echo "Pedido não encontrado"; exit;
     }
 
     public function delete(int $id)
     {
-        $all = $this->readAll();
-        $filtered = array_values(array_filter($all, fn($it) => !isset($it['id']) || (int)$it['id'] !== $id));
-        if (count($filtered) === count($all)) {
-            $this->json(['deleted' => false], 404);
-        }
-        $this->writeAll($filtered);
-        $this->json(['deleted' => true]);
+        $all = $this->readJson($this->storage());
+        $filtered = array_values(array_filter($all, fn($it)=> (int)($it['id']??0) !== $id));
+        $this->writeJson($this->storage(), $filtered);
+        header('Location: /?r=pedidos/manage'); exit;
     }
 }

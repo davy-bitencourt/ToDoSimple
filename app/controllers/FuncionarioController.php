@@ -3,93 +3,51 @@ require_once __DIR__ . '/Controller.php';
 
 class FuncionarioController extends Controller
 {
-    private function storagePath(): string
-    {
-        return __DIR__ . '/../../storage/funcionario.json';
-    }
-
-    private function readAll(): array
-    {
-        $raw = @file_get_contents($this->storagePath());
-        $data = json_decode($raw, true);
-        return is_array($data) ? $data : [];
-    }
-
-    private function writeAll(array $data): void
-    {
-        file_put_contents($this->storagePath(), json_encode(array_values($data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . PHP_EOL, LOCK_EX);
-    }
+    private function path() { return __DIR__ . '/../../storage/funcionario.json'; }
 
     public function index()
     {
-        $this->render('funcionarios/index', ['funcionarios' => $this->readAll()]);
+        $items = $this->readJson($this->path());
+        $this->renderView(__DIR__ . '/../../views/gerenciarFuncionario.php', ['items'=>$items]);
     }
 
-    public function show(int $id)
-    {
-        foreach ($this->readAll() as $f) {
-            if (isset($f['id']) && (int)$f['id'] === $id) {
-                $this->render('funcionarios/show', ['funcionario' => $f]);
-                return;
-            }
-        }
-        $this->json(['error' => 'Funcionario não encontrado'], 404);
-    }
-
-    public function create()
-    {
-        $this->render('funcionarios/create');
-    }
+    public function create() { $this->renderView(__DIR__ . '/../../views/funcionarios/create.php'); }
 
     public function store(array $data)
     {
-        if (!isset($data['nome']) || !isset($data['adm_access'])) {
-            $this->json(['error' => 'nome e adm_access obrigatórios'], 400);
-        }
-        $all = $this->readAll();
-        $nextId = 1;
-        foreach ($all as $it) if (isset($it['id'])) $nextId = max($nextId, (int)$it['id'] + 1);
-
-        $entry = ['id' => $nextId, 'nome' => $data['nome'], 'adm_access' => (bool)$data['adm_access']];
-        $all[] = $entry;
-        $this->writeAll($all);
-        $this->json($entry, 201);
+        $items = $this->readJson($this->path());
+        $next = 1; foreach ($items as $it) if (!empty($it['id'])) $next = max($next,(int)$it['id']+1);
+        $items[] = ['id'=>$next,'nome'=>$data['nome'] ?? '','adm_access'=>!empty($data['adm_access'])?true:false];
+        $this->writeJson($this->path(), $items);
+        header('Location: /?r=funcionarios/manage'); exit;
     }
 
     public function edit(int $id)
     {
-        foreach ($this->readAll() as $f) {
-            if (isset($f['id']) && (int)$f['id'] === $id) {
-                $this->render('funcionarios/edit', ['funcionario' => $f]);
-                return;
-            }
+        $items = $this->readJson($this->path());
+        foreach ($items as $it) if ((int)($it['id']??0) === $id) {
+            $this->renderView(__DIR__ . '/../../views/funcionarios/edit.php', ['f'=>$it]);
         }
-        $this->json(['error' => 'Funcionario não encontrado'], 404);
+        http_response_code(404); echo "Funcionário não encontrado"; exit;
     }
 
     public function update(int $id, array $data)
     {
-        $all = $this->readAll();
-        foreach ($all as $i => $f) {
-            if (isset($f['id']) && (int)$f['id'] === $id) {
-                $all[$i]['nome'] = $data['nome'] ?? $f['nome'];
-                if (isset($data['adm_access'])) $all[$i]['adm_access'] = (bool)$data['adm_access'];
-                $this->writeAll($all);
-                $this->json($all[$i]);
-            }
+        $items = $this->readJson($this->path());
+        foreach ($items as $i=>$it) if ((int)($it['id']??0) === $id) {
+            $items[$i]['nome'] = $data['nome'] ?? $it['nome'];
+            $items[$i]['adm_access'] = !empty($data['adm_access']);
+            $this->writeJson($this->path(), $items);
+            header('Location: /?r=funcionarios/manage'); exit;
         }
-        $this->json(['error' => 'Funcionario não encontrado'], 404);
+        http_response_code(404); echo "Funcionário não encontrado"; exit;
     }
 
     public function delete(int $id)
     {
-        $all = $this->readAll();
-        $filtered = array_values(array_filter($all, fn($it) => !isset($it['id']) || (int)$it['id'] !== $id));
-        if (count($filtered) === count($all)) {
-            $this->json(['deleted' => false], 404);
-        }
-        $this->writeAll($filtered);
-        $this->json(['deleted' => true]);
+        $items = $this->readJson($this->path());
+        $items = array_values(array_filter($items, fn($it)=> (int)($it['id']??0) !== $id));
+        $this->writeJson($this->path(), $items);
+        header('Location: /?r=funcionarios/manage'); exit;
     }
 }
-?>
