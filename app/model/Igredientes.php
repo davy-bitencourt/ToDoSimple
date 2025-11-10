@@ -1,8 +1,14 @@
 <?php
 class igredientes{
+    private int $id;
+    private string $nome;
+
     public function __construct(
-        private int $id,
-        private string $nome,
-    ){}
+        int $id, 
+        string $nome
+    ) {
+        $this->id = $id;
+        $this->nome = $nome;
+    }
 }
 ?>

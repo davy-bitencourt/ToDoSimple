@@ -1,8 +1,14 @@
 <?php
 class Cliente{
+    public string $nome;
+    public string $endereco;
+
     public function __construct(
-        private string $nome,
-        private string $endereco,
-    ) {}
+        string $nome,
+        string $endereco,
+    ) {
+        $this->nome = $nome;
+        $this->endereco = $endereco;
+    }
 }
 ?>
