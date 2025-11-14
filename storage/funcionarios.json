@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1,
+        "nome": "Admin",
+        "email": "adm@adm",
+        "senha_hash": "$2y$10$cW0gEq15kTAZKo4QLEZFjO8vtglBWGuId3Z0awKlrE4m3AGg5qx1u",
+        "is_admin": 1
+    },
+    {
+        "id": 2,
+        "nome": "Usuário",
+        "email": "user@local",
+        "senha_hash": "$2y$10$xREYmmnYLMaZrRvJZVgyP.2UPbQMBmLpFj0a9bFQlZi3nxL0WJmNW",
+        "is_admin": 0
+    }
+]

@@ -1,54 +1,67 @@
 <?php
-require_once __DIR__ . '/Controller.php';
+require_once __DIR__.'/../models/Prato.php';
+require_once __DIR__.'/../models/Autenticacao.php';
 
-class PratoController extends Controller
-{
-    private function pratosPath() { return __DIR__ . '/../../storage/pratos.json'; }
-    private function ingsPath() { return __DIR__ . '/../../storage/igredientes.json'; }
-
-    public function manage()
-    {
-        $pratos = $this->readJson($this->pratosPath());
-        $ings = $this->readJson($this->ingsPath());
-        $this->renderView(__DIR__ . '/../../views/gerenciarPratos.php', ['pratos'=>$pratos,'ings'=>$ings]);
+class PratoController {
+    public static function paginaInicial() {
+        $pratos = Prato::listar();
+        $title = 'Cardápio';
+        ob_start();
+        include __DIR__.'/../views/pratos/home.php';
+        $content = ob_get_clean();
+        include __DIR__.'/../views/layout/main.php';
     }
 
-    public function create() { $this->renderView(__DIR__ . '/../../views/pratos_create.php', ['ings'=>$this->readJson($this->ingsPath())]); }
-    public function store(array $data)
-    {
-        $pratos = $this->readJson($this->pratosPath());
-        $next = 1; foreach ($pratos as $p) if (!empty($p['id'])) $next = max($next,(int)$p['id']+1);
-        $pratos[] = ['id'=>$next,'nome'=>$data['nome'] ?? '','id_igredientes'=>$data['id_igredientes'] ?? []];
-        $this->writeJson($this->pratosPath(), $pratos);
-        header('Location: /?r=pratos/manage'); exit;
+    public static function listar() {
+        Autenticacao::exigirUsuario();
+        $pratos = Prato::listar();
+        $title = 'Pratos';
+        ob_start();
+        include __DIR__.'/../views/pratos/index.php';
+        $content = ob_get_clean();
+        include __DIR__.'/../views/layout/main.php';
     }
 
-    public function edit(int $id)
-    {
-        $pratos = $this->readJson($this->pratosPath());
-        foreach ($pratos as $p) if ((int)($p['id']??0) === $id) {
-            $this->renderView(__DIR__ . '/../../views/pratos_edit.php', ['prato'=>$p,'ings'=>$this->readJson($this->ingsPath())]);
-        }
-        http_response_code(404); echo "Prato não encontrado"; exit;
+    public static function novo() {
+        Autenticacao::exigirAdministrador();
+        $prato = [];
+        $isEdit = false;
+        $title = 'Novo prato';
+        ob_start();
+        include __DIR__.'/../views/pratos/form.php';
+        $content = ob_get_clean();
+        include __DIR__.'/../views/layout/main.php';
     }
 
-    public function update(int $id, array $data)
-    {
-        $pratos = $this->readJson($this->pratosPath());
-        foreach ($pratos as $i=>$p) if ((int)($p['id']??0) === $id) {
-            $pratos[$i]['nome'] = $data['nome'] ?? $p['nome'];
-            $pratos[$i]['id_igredientes'] = $data['id_igredientes'] ?? [];
-            $this->writeJson($this->pratosPath(), $pratos);
-            header('Location: /?r=pratos/manage'); exit;
-        }
-        http_response_code(404); echo "Prato não encontrado"; exit;
+    public static function criar() {
+        Autenticacao::exigirAdministrador();
+        Prato::criar($_POST['nome'], (float) $_POST['preco'], $_POST['descricao'] ?? '');
+        $_SESSION['flash'] = 'Prato criado.';
+        header('Location: /?r=prato/listar');
     }
 
-    public function delete(int $id)
-    {
-        $pratos = $this->readJson($this->pratosPath());
-        $pratos = array_values(array_filter($pratos, fn($it)=> (int)($it['id']??0) !== $id));
-        $this->writeJson($this->pratosPath(), $pratos);
-        header('Location: /?r=pratos/manage'); exit;
+    public static function editar() {
+        Autenticacao::exigirAdministrador();
+        $prato = Prato::buscar((int) ($_GET['id'] ?? 0));
+        $isEdit = true;
+        $title = 'Editar prato';
+        ob_start();
+        include __DIR__.'/../views/pratos/form.php';
+        $content = ob_get_clean();
+        include __DIR__.'/../views/layout/main.php';
+    }
+
+    public static function atualizar() {
+        Autenticacao::exigirAdministrador();
+        Prato::atualizar((int) $_POST['id'], $_POST['nome'], (float) $_POST['preco'], $_POST['descricao'] ?? '');
+        $_SESSION['flash'] = 'Prato atualizado.';
+        header('Location: /?r=prato/listar');
+    }
+
+    public static function excluir() {
+        Autenticacao::exigirAdministrador();
+        Prato::excluir((int) $_POST['id']);
+        $_SESSION['flash'] = 'Prato excluído.';
+        header('Location: /?r=prato/listar');
     }
 }

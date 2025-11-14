@@ -1,1 +1,20 @@
-[]
+[
+    {
+        "id": 1,
+        "nome": "Spaghetti da Casa",
+        "preco": 39.9,
+        "descricao": "Ingredientes:\n      Spaghetti italiano\n      Molho de tomate artesanal\n      Azeite extra virgem\n      Alho dourado\n      Queijo parmesão ralado\n      Manjericão fresco\n      Sal e pimenta (a gosto).\n      \n      Porção: 400 gramas.\n      "
+    },
+    {
+        "id": 2,
+        "nome": "Parmegiana da Casa",
+        "preco": 49.9,
+        "descricao": "Bife à parmegiana com arroz e fritas."
+    },
+    {
+        "id": 3,
+        "nome": "Salada da Casa",
+        "preco": 29.9,
+        "descricao": "Alface, croutons, parmesão e molho Caesar."
+    }
+]

@@ -1,0 +1,110 @@
+/* Base */
+* {
+  box-sizing: border-box;
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #0b0e14;
+  color: #e6e6e6;
+}
+
+a {
+  color: #89b4fa;
+  text-decoration: none;
+}
+
+header,
+main {
+  max-width: 900px;
+  margin: auto;
+  padding: 14px;
+}
+
+/* Componentes */
+.card {
+  background: #151a23;
+  border: 1px solid #1f2430;
+  border-radius: 12px;
+  padding: 14px;
+  margin: 10px 0;
+}
+
+.btn {
+  display: inline-block;
+  background: #2b90d9;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 0;
+  cursor: pointer;
+}
+
+.input,
+select,
+textarea {
+  width: 100%;
+  padding: 10px;
+  background: #0f131b;
+  border: 1px solid #30384a;
+  border-radius: 8px;
+  color: #e6e6e6;
+}
+
+/* Tabela (usar a classe .table nas tabelas que quiser estilizar) */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1em;
+}
+
+.table th,
+.table td {
+  padding: 8px;
+  border-bottom: 1px solid #272f3f;
+  text-align: left;
+}
+
+.table th {
+  background-color: #151a23;
+}
+
+/* Utilitários */
+.badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #30384a;
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+}
+
+/* usar .grid e .grid2 juntos para ter duas colunas */
+.grid2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.flex-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.w-80 {
+  max-width: 80px;
+}
+
+.inline {
+  display: inline;
+}
+
+.mt-12 {
+  margin-top: 12px;
+}
+
+.hidden {
+  display: none;
+}

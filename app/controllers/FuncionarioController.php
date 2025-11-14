@@ -1,53 +1,53 @@
 <?php
-require_once __DIR__ . '/Controller.php';
+require_once __DIR__.'/../models/Autenticacao.php';
+require_once __DIR__.'/../models/Funcionario.php';
 
-class FuncionarioController extends Controller
-{
-    private function path() { return __DIR__ . '/../../storage/funcionario.json'; }
-
-    public function index()
-    {
-        $items = $this->readJson($this->path());
-        $this->renderView(__DIR__ . '/../../views/gerenciarFuncionario.php', ['items'=>$items]);
+class FuncionarioController {
+    public static function entrar() {
+        $title = 'Entrar';
+        ob_start();
+        include __DIR__.'/../views/funcionarios/login.php';
+        $content = ob_get_clean();
+        include __DIR__.'/../views/layout/main.php';
     }
 
-    public function create() { $this->renderView(__DIR__ . '/../../views/funcionarios/create.php'); }
-
-    public function store(array $data)
-    {
-        $items = $this->readJson($this->path());
-        $next = 1; foreach ($items as $it) if (!empty($it['id'])) $next = max($next,(int)$it['id']+1);
-        $items[] = ['id'=>$next,'nome'=>$data['nome'] ?? '','adm_access'=>!empty($data['adm_access'])?true:false];
-        $this->writeJson($this->path(), $items);
-        header('Location: /?r=funcionarios/manage'); exit;
-    }
-
-    public function edit(int $id)
-    {
-        $items = $this->readJson($this->path());
-        foreach ($items as $it) if ((int)($it['id']??0) === $id) {
-            $this->renderView(__DIR__ . '/../../views/funcionarios/edit.php', ['f'=>$it]);
+    public static function autenticar() {
+        if (Autenticacao::autenticar($_POST['email'], $_POST['senha'])) {
+            $_SESSION['flash'] = 'Bem-vindo!';
+            header('Location: /?r=pedido/listar');
+        } else {
+            $_SESSION['flash'] = 'Login inválido.';
+            header('Location: /?r=func/entrar');
         }
-        http_response_code(404); echo "Funcionário não encontrado"; exit;
     }
 
-    public function update(int $id, array $data)
-    {
-        $items = $this->readJson($this->path());
-        foreach ($items as $i=>$it) if ((int)($it['id']??0) === $id) {
-            $items[$i]['nome'] = $data['nome'] ?? $it['nome'];
-            $items[$i]['adm_access'] = !empty($data['adm_access']);
-            $this->writeJson($this->path(), $items);
-            header('Location: /?r=funcionarios/manage'); exit;
-        }
-        http_response_code(404); echo "Funcionário não encontrado"; exit;
+    public static function sair() {
+        Autenticacao::exigirUsuario();
+        Autenticacao::encerrarSessao();
+        header('Location: /');
     }
 
-    public function delete(int $id)
-    {
-        $items = $this->readJson($this->path());
-        $items = array_values(array_filter($items, fn($it)=> (int)($it['id']??0) !== $id));
-        $this->writeJson($this->path(), $items);
-        header('Location: /?r=funcionarios/manage'); exit;
+    public static function gerenciar() {
+        Autenticacao::exigirAdministrador();
+        $funcionarios = Funcionario::listar();
+        $title = 'Funcionários';
+        ob_start();
+        include __DIR__.'/../views/funcionarios/gerenciar.php';
+        $content = ob_get_clean();
+        include __DIR__.'/../views/layout/main.php';
+    }
+
+    public static function criar() {
+        Autenticacao::exigirAdministrador();
+        Funcionario::criar($_POST['nome'], $_POST['email'], $_POST['senha'], (bool) $_POST['is_admin']);
+        $_SESSION['flash'] = 'Funcionário criado.';
+        header('Location: /?r=func/gerenciar');
+    }
+
+    public static function excluir() {
+        Autenticacao::exigirAdministrador();
+        Funcionario::excluir((int) $_POST['id']);
+        $_SESSION['flash'] = 'Funcionário excluído.';
+        header('Location: /?r=func/gerenciar');
     }
 }

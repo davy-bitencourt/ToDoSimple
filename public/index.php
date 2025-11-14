@@ -1,164 +1,145 @@
 <?php
-ini_set('display_errors', '1');
-error_reporting(E_ALL);
-session_start();
-
-require_once __DIR__ . '/../app/controllers/Controller.php';
-require_once __DIR__ . '/../app/controllers/PedidoController.php';
-require_once __DIR__ . '/../app/controllers/PratoController.php';
-require_once __DIR__ . '/../app/controllers/FuncionarioController.php';
-
-function isLogged(): bool {
-    return isset($_SESSION['role']);
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
 }
 
-function isAdmin(): bool {
-    return isLogged() && $_SESSION['role'] === 'employee' && !empty($_SESSION['adm']);
-}
+require_once __DIR__.'/../app/controllers/PratoController.php';
+require_once __DIR__.'/../app/controllers/PedidoController.php';
+require_once __DIR__.'/../app/controllers/FuncionarioController.php';
+require_once __DIR__.'/../app/controllers/CarrinhoController.php';
 
-$r = $_GET['r'] ?? 'pedidos/create';
-$parts = explode('/', $r);
-$resource = $parts[0] ?? '';
-$action = $parts[1] ?? 'index';
+$r = $_GET['r'] ?? 'inicio';
+$metodo = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
-switch ($resource) {
+switch ($r) {
+    case 'inicio':
+        PratoController::paginaInicial();
+        break;
 
-
-    case 'auth':
-        if ($action === 'login') {
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                $id = (int)($_POST['id'] ?? 0);
-                $file = __DIR__ . '/../storage/funcionario.json';
-                $data = is_file($file) ? json_decode(file_get_contents($file), true) : [];
-
-                foreach ($data as $u) {
-                    if (isset($u['id']) && (int)$u['id'] === $id) {
-                        $_SESSION['role'] = 'employee';
-                        $_SESSION['user'] = $u;
-                        $_SESSION['adm'] = !empty($u['adm_access']);
-                        header('Location: /?r=pedidos/manage');
-                        exit;
-                    }
-                }
-
-                $_SESSION['login_error'] = 'Funcionário não encontrado';
-                include __DIR__ . '/../views/login.php';
-                exit;
-            }
-
-            include __DIR__ . '/../views/login.php';
-            exit;
+    case 'prato/listar':
+        PratoController::listar();
+        break;
+    case 'prato/novo':
+        PratoController::novo();
+        break;
+    case 'prato/criar':
+        if ($metodo === 'POST') {
+            PratoController::criar();
+        } else {
+            http_response_code(405);
         }
-
-        if ($action === 'logout') {
-            session_destroy();
-            header('Location: /?r=pedidos/create');
-            exit;
+        break;
+    case 'prato/editar':
+        PratoController::editar();
+        break;
+    case 'prato/atualizar':
+        if ($metodo === 'POST') {
+            PratoController::atualizar();
+        } else {
+            http_response_code(405);
+        }
+        break;
+    case 'prato/excluir':
+        if ($metodo === 'POST') {
+            PratoController::excluir();
+        } else {
+            http_response_code(405);
         }
         break;
 
-    case 'pedidos':
-        $pc = new PedidoController();
-
-        if ($action === 'create') {
-            $pc->create();
-        } elseif ($action === 'store' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-            $pc->store($_POST);
+    case 'pedido/novo':
+        PedidoController::novo();
+        break;
+    case 'pedido/criar':
+        if ($metodo === 'POST') {
+            PedidoController::criar();
         } else {
-            if (!isLogged() || ($_SESSION['role'] ?? '') !== 'employee') {
-                include __DIR__ . '/../views/login.php';
-                exit;
-            }
-
-            switch ($action) {
-                case 'manage':
-                case 'index':
-                    $pc->index();
-                    break;
-                case 'show':
-                    if (isset($_GET['id'])) $pc->show((int)$_GET['id']);
-                    break;
-                case 'update':
-                    if ($_SERVER['REQUEST_METHOD'] === 'POST') $pc->update((int)($_POST['id'] ?? 0), $_POST);
-                    break;
-                case 'delete':
-                    if ($_SERVER['REQUEST_METHOD'] === 'POST') $pc->delete((int)($_POST['id'] ?? 0));
-                    break;
-                default:
-                    $pc->index();
-            }
+            http_response_code(405);
         }
-        exit;
-
-    case 'pratos':
-    case 'ingredientes':
-    case 'igredientes': // compatibilidade antiga
-        if (!isAdmin()) {
-            include __DIR__ . '/../views/login.php';
-            exit;
+        break;
+    case 'pedido/listar':
+        PedidoController::listar();
+        break;
+    case 'pedido/atualizar-status':
+        if ($metodo === 'POST') {
+            PedidoController::atualizarStatus();
+        } else {
+            http_response_code(405);
         }
+        break;
 
-        $pc = new PratoController();
-
-        switch ($action) {
-            case 'manage':
-            case 'index':
-                $pc->manage();
-                break;
-            case 'create':
-                $pc->create();
-                break;
-            case 'store':
-                if ($_SERVER['REQUEST_METHOD'] === 'POST') $pc->store($_POST);
-                break;
-            case 'edit':
-                if (isset($_GET['id'])) $pc->edit((int)$_GET['id']);
-                break;
-            case 'update':
-                if ($_SERVER['REQUEST_METHOD'] === 'POST') $pc->update((int)($_POST['id'] ?? 0), $_POST);
-                break;
-            case 'delete':
-                if ($_SERVER['REQUEST_METHOD'] === 'POST') $pc->delete((int)($_POST['id'] ?? 0));
-                break;
-            default:
-                $pc->manage();
+    case 'func/entrar':
+        FuncionarioController::entrar();
+        break;
+    case 'func/autenticar':
+        if ($metodo === 'POST') {
+            FuncionarioController::autenticar();
+        } else {
+            http_response_code(405);
         }
-        exit;
-
-    case 'funcionarios':
-        if (!isAdmin()) {
-            include __DIR__ . '/../views/login.php';
-            exit;
+        break;
+    case 'func/sair':
+        FuncionarioController::sair();
+        break;
+    case 'func/gerenciar':
+        FuncionarioController::gerenciar();
+        break;
+    case 'func/criar':
+        if ($metodo === 'POST') {
+            FuncionarioController::criar();
+        } else {
+            http_response_code(405);
         }
-
-        $fc = new FuncionarioController();
-
-        switch ($action) {
-            case 'manage':
-            case 'index':
-                $fc->index();
-                break;
-            case 'create':
-                $fc->create();
-                break;
-            case 'store':
-                if ($_SERVER['REQUEST_METHOD'] === 'POST') $fc->store($_POST);
-                break;
-            case 'edit':
-                if (isset($_GET['id'])) $fc->edit((int)$_GET['id']);
-                break;
-            case 'update':
-                if ($_SERVER['REQUEST_METHOD'] === 'POST') $fc->update((int)($_POST['id'] ?? 0), $_POST);
-                break;
-            case 'delete':
-                if ($_SERVER['REQUEST_METHOD'] === 'POST') $fc->delete((int)($_POST['id'] ?? 0));
-                break;
-            default:
-                $fc->index();
+        break;
+    case 'func/excluir':
+        if ($metodo === 'POST') {
+            FuncionarioController::excluir();
+        } else {
+            http_response_code(405);
         }
-        exit;
+        break;
+
+    case 'carrinho':
+        CarrinhoController::ver();
+        break;
+    case 'carrinho/adicionar':
+        if ($metodo === 'POST') {
+            CarrinhoController::adicionar();
+        } else {
+            http_response_code(405);
+        }
+        break;
+    case 'carrinho/atualizar':
+        if ($metodo === 'POST') {
+            CarrinhoController::atualizar();
+        } else {
+            http_response_code(405);
+        }
+        break;
+    case 'carrinho/remover':
+        if ($metodo === 'POST') {
+            CarrinhoController::remover();
+        } else {
+            http_response_code(405);
+        }
+        break;
+    case 'carrinho/limpar':
+        if ($metodo === 'POST') {
+            CarrinhoController::limpar();
+        } else {
+            http_response_code(405);
+        }
+        break;
+    case 'carrinho/finalizar':
+        if ($metodo === 'POST') {
+            CarrinhoController::finalizar();
+        } else {
+            http_response_code(405);
+        }
+        break;
+
+    default:
+        http_response_code(404);
+        echo 'Rota não encontrada';
+        break;
 }
-
-
-include __DIR__ . '/../views/fazerPedido.php';
-exit;
