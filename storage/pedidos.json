@@ -1,1 +1,110 @@
-[]
+[
+    {
+        "id": 1,
+        "cliente_nome": "aaa",
+        "cliente_endereco": null,
+        "tipo_entrega": "retirada",
+        "itens": [
+            {
+                "prato_id": 2,
+                "nome": "Parmegiana da Casa",
+                "preco_unitario": 49.9,
+                "quantidade": 4,
+                "subtotal": 199.6
+            }
+        ],
+        "total": 199.6,
+        "status": "entregue",
+        "criado_em": "2025-11-17 01:39:21"
+    },
+    {
+        "id": 2,
+        "cliente_nome": "aluno",
+        "cliente_endereco": null,
+        "tipo_entrega": "retirada",
+        "itens": [
+            {
+                "prato_id": 2,
+                "nome": "Parmegiana da Casa",
+                "preco_unitario": 49.9,
+                "quantidade": 1,
+                "subtotal": 49.9
+            }
+        ],
+        "total": 49.9,
+        "status": "novo",
+        "criado_em": "2025-11-17 02:16:55"
+    },
+    {
+        "id": 3,
+        "cliente_nome": "aaa",
+        "cliente_endereco": null,
+        "tipo_entrega": "retirada",
+        "itens": [
+            {
+                "prato_id": 2,
+                "nome": "Parmegiana da Casa",
+                "preco_unitario": 49.9,
+                "quantidade": 1,
+                "subtotal": 49.9
+            }
+        ],
+        "total": 49.9,
+        "status": "novo",
+        "criado_em": "2025-11-17 02:42:19"
+    },
+    {
+        "id": 4,
+        "cliente_nome": "vv",
+        "cliente_endereco": null,
+        "tipo_entrega": "retirada",
+        "itens": [
+            {
+                "prato_id": 2,
+                "nome": "Parmegiana da Casa",
+                "preco_unitario": 49.9,
+                "quantidade": 1,
+                "subtotal": 49.9
+            }
+        ],
+        "total": 49.9,
+        "status": "em_preparo",
+        "criado_em": "2025-11-17 02:43:00"
+    },
+    {
+        "id": 5,
+        "cliente_nome": "fff",
+        "cliente_endereco": null,
+        "tipo_entrega": "retirada",
+        "itens": [
+            {
+                "prato_id": 2,
+                "nome": "Parmegiana da Casa",
+                "preco_unitario": 49.9,
+                "quantidade": 10,
+                "subtotal": 499
+            }
+        ],
+        "total": 499,
+        "status": "novo",
+        "criado_em": "2025-11-17 02:49:09"
+    },
+    {
+        "id": 6,
+        "cliente_nome": "ggg",
+        "cliente_endereco": "fbzgfgnfff dksvmalkdfvfamvk ikvoiavrfanbvk",
+        "tipo_entrega": "entrega",
+        "itens": [
+            {
+                "prato_id": 2,
+                "nome": "Parmegiana da Casa",
+                "preco_unitario": 49.9,
+                "quantidade": 2,
+                "subtotal": 99.8
+            }
+        ],
+        "total": 99.8,
+        "status": "novo",
+        "criado_em": "2025-11-17 02:53:06"
+    }
+]

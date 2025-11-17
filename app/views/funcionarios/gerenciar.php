@@ -21,22 +21,35 @@
         </select>
       </div>
     </div>
-    <button class="btn">Adicionar</button>
+
+    <div class="center">
+      <button class="btn">Adicionar</button>
+    </div>
+
   </form>
 </div>
-<table>
-  <tr><th>Nome</th><th>E-mail</th><th>Administrador</th><th>Ações</th></tr>
-  <?php foreach ($funcionarios as $funcionario): ?>
+
+<div class="center">
+  <table class="table">
     <tr>
-      <td><?= htmlspecialchars($funcionario['nome']) ?></td>
-      <td><?= htmlspecialchars($funcionario['email']) ?></td>
-      <td><?= $funcionario['is_admin'] ? 'Sim' : 'Não' ?></td>
-      <td>
-        <form style="display:inline" method="post" action="/?r=func/excluir">
-          <input type="hidden" name="id" value="<?= (int) $funcionario['id'] ?>">
-          <button class="btn" onclick="return confirm('Excluir funcionário?')">Excluir</button>
-        </form>
-      </td>
+      <th>Nome</th>
+      <th>E-mail</th>
+      <th>Administrador</th>
+      <th>Ações</th>
     </tr>
-  <?php endforeach; ?>
-</table>
+
+    <?php foreach ($funcionarios as $funcionario): ?>
+      <tr>
+        <td><?= htmlspecialchars($funcionario['nome']) ?></td>
+        <td><?= htmlspecialchars($funcionario['email']) ?></td>
+        <td><?= $funcionario['is_admin'] ? 'Sim' : 'Não' ?></td>
+        <td>
+          <form class="inline" method="post" action="/?r=func/excluir">
+            <input type="hidden" name="id" value="<?= (int) $funcionario['id'] ?>">
+            <button class="btn" onclick="return confirm('Excluir funcionário?')">Excluir</button>
+          </form>
+        </td>
+      </tr>
+    <?php endforeach; ?>
+  </table>
+</div>

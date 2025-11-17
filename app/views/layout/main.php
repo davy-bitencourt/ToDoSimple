@@ -1,9 +1,14 @@
 <?php
+// Inicia a sessão apenas se ainda não estiver ativa
 if (session_status() !== PHP_SESSION_ACTIVE) {
   session_start();
 }
-$usuario = $_SESSION['usuario'] ?? null;
-require_once __DIR__.'/../../models/Carrinho.php';
+
+// Pega os dados do funcionário logado (quando existir)
+$funcionario = $_SESSION['usuario'] ?? null;
+
+// Importa o model do carrinho e calcula o total de itens
+require_once __DIR__ . '/../../models/Carrinho.php';
 $quantidadeCarrinho = Carrinho::quantidadeTotal();
 ?>
 <!doctype html>
@@ -20,33 +25,50 @@ $quantidadeCarrinho = Carrinho::quantidadeTotal();
   <header>
     <h1>Restaurante</h1>
     <?php
-      $links = [
-        ['href' => '/', 'label' => 'Cardápio'],
-        ['href' => '/?r=carrinho', 'label' => 'Carrinho'.($quantidadeCarrinho > 0 ? ' ('.$quantidadeCarrinho.')' : '')],
-      ];
-      if (!$usuario) {
-        $links[] = ['href' => '/?r=func/entrar', 'label' => 'Área do colaborador'];
-      } else {
-        $links[] = ['href' => '/?r=pedido/listar', 'label' => 'Pedidos'];
-        if ($usuario['is_admin']) {
-          $links[] = ['href' => '/?r=prato/listar', 'label' => 'Pratos'];
-          $links[] = ['href' => '/?r=func/gerenciar', 'label' => 'Funcionários'];
-        }
-        $links[] = ['href' => '/?r=func/sair', 'label' => 'Sair ('.htmlspecialchars($usuario['nome']).')'];
+
+    $links = [];
+
+    if (!$funcionario) {
+      // Visitante
+      $links[] = ['href' => '/', 'label' => 'Cardápio'];
+      $links[] = ['href' => '/?r=carrinho', 'label' => 'Carrinho' . ($quantidadeCarrinho > 0 ? ' (' . $quantidadeCarrinho . ')' : '')];
+      $links[] = ['href' => '/?r=func/entrar', 'label' => 'Área do colaborador'];
+    } else {
+      // Funcionário autenticado: pode ver pedidos
+      $links[] = ['href' => '/?r=pedido/listar', 'label' => 'Pedidos'];
+
+      // Administradores também podem gerenciar pratos
+      if (!empty($funcionario['is_admin'])) {
+        $links[] = ['href' => '/?r=prato/listar', 'label' => 'Pratos'];
       }
+
+      // Link para sair, exibindo o nome do colaborador
+      $nome = trim($funcionario['nome'] ?? '') ?: 'colaborador';
+      $links[] = ['href' => '/?r=func/sair', 'label' => 'Sair (' . $nome . ')'];
+    }
+
     ?>
+
     <nav>
       <?php foreach ($links as $index => $link): ?>
-        <?= $index > 0 ? ' | ' : '' ?><a href="<?= $link['href'] ?>"><?= $link['label'] ?></a>
+        <!-- Link normal do menu -->
+        <a href="<?= htmlspecialchars($link['href']) ?>">
+          <?= htmlspecialchars($link['label']) ?>
+        </a>
       <?php endforeach; ?>
     </nav>
   </header>
 
   <main>
     <?php if (!empty($_SESSION['flash'])): ?>
-      <div class="card"><?= htmlspecialchars($_SESSION['flash']);
-      unset($_SESSION['flash']); ?></div>
+      <!-- Mensagem rápida (flash) para feedback ao usuário -->
+      <div class="card">
+        <?= htmlspecialchars($_SESSION['flash']); ?>
+      </div>
+      <?php unset($_SESSION['flash']); // Apaga a mensagem depois de exibir ?>
     <?php endif; ?>
+
+    <!-- Conteúdo específico de cada página -->
     <?= $content ?>
   </main>
 </body>

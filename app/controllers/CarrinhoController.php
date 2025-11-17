@@ -71,12 +71,6 @@ class CarrinhoController
         self::redirecionar(self::obterDestino());
     }
 
-    public static function limpar(): void
-    {
-        Carrinho::limpar();
-        $_SESSION['flash'] = 'Carrinho esvaziado.';
-        self::redirecionar(self::obterDestino());
-    }
 
     public static function finalizar(): void
     {
@@ -131,7 +125,6 @@ class CarrinhoController
         Carrinho::limpar();
         unset($_SESSION['checkout_data']);
         $_SESSION['flash'] = 'Pedido realizado com sucesso!';
-        $_SESSION['flash2'] = 'Nao esqueça o pix!';
         header('Location: /');
     }
 }

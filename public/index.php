@@ -81,24 +81,6 @@ switch ($r) {
     case 'func/sair':
         FuncionarioController::sair();
         break;
-    case 'func/gerenciar':
-        FuncionarioController::gerenciar();
-        break;
-    case 'func/criar':
-        if ($metodo === 'POST') {
-            FuncionarioController::criar();
-        } else {
-            http_response_code(405);
-        }
-        break;
-    case 'func/excluir':
-        if ($metodo === 'POST') {
-            FuncionarioController::excluir();
-        } else {
-            http_response_code(405);
-        }
-        break;
-
     case 'carrinho':
         CarrinhoController::ver();
         break;
