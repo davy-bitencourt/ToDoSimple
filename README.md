@@ -1,8 +1,8 @@
 # Restaurante MVC simples (PHP + JSON)
 
-Projeto desenvolvido  na aula de Gerência de Configuração. Sem uso de banco de dados SQL, utilizando arquivos JSON para armazenamento.
+Projeto desenvolvido  na aula de Gerência de Configuração. Sem uso de banco de dados SQL, utilizando apenas o JSON para persistência.
 
-O cliente pode montar um carrinho, ajustar quantidades e finalizar o pedido com um único checkout.
+O administrador pode criar pratos e gerenciar os pedidos feitos pelo cliente. Já O cliente pode montar um carrinho, ajustar quantidades e finalizar o pedido com um único checkout.
 
 ## Como rodar
 
@@ -14,8 +14,7 @@ O cliente pode montar um carrinho, ajustar quantidades e finalizar o pedido com 
 
 3) Acessar:
 - Cliente: http://localhost:8000/
-- Funcionário/Admin: http://localhost:8000/?r=func/entrar
 
 Credenciais (email e senha):
-- admin@adm / adm  (administrador)
+- adm@adm / adm  (administrador)
 - user@local / 123456  (usuário comum)
